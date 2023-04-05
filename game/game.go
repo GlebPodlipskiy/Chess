@@ -4,6 +4,7 @@ import (
 	"chess/game/board"
 	"chess/game/fen"
 	"chess/game/turn"
+	"fmt"
 )
 
 var pawn = 1
@@ -67,12 +68,12 @@ func get_line(current_board board.Board, rank int, file int, directions [][3]int
 					Rank: next_rank,
 				}
 				if next_side == 0 {
-					next_turn := turn.Turn{
+					move_turn := turn.Turn{
 						Claimed:  false,
 						OldCords: old_cords,
 						NewCords: next_cords,
 					}
-					turns = append(turns, next_turn)
+					turns = append(turns, move_turn)
 				} else if next_side == -side {
 					claimed_turn := turn.Turn{
 						Claimed:  true,
@@ -81,11 +82,12 @@ func get_line(current_board board.Board, rank int, file int, directions [][3]int
 					}
 					turns = append(turns, claimed_turn)
 					break
-				} else if next_side != side {
+				} else if next_side == side {
 					break
 				}
+			} else {
+				break
 			}
-			break
 		}
 	}
 	return turns
@@ -180,7 +182,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{1, 0, 8},
 			{0, -1, 8},
 			{-1, 0, 8},
-			{0, -1, 8},
+			{0, 1, 8},
 		}
 		return get_line(current_board, rank, file, directions)
 	} else if piece == queen*side {
@@ -192,7 +194,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{1, 0, 8},
 			{0, -1, 8},
 			{-1, 0, 8},
-			{0, -1, 8},
+			{0, 1, 8},
 		}
 		return get_line(current_board, rank, file, directions)
 	} else if piece == king*side {
@@ -204,7 +206,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{1, 0, 1},
 			{0, -1, 1},
 			{-1, 0, 1},
-			{0, -1, 1},
+			{0, 1, 1},
 		}
 		return get_line(current_board, rank, file, directions)
 	}
@@ -216,6 +218,7 @@ func GetAllTurns(current_board board.Board, current_side int) []turn.Turn {
 		side := get_side(piece.Value)
 		if side == current_side {
 			turns := get_turns(current_board, piece.Rank, piece.File)
+			fmt.Println(len(turns))
 			all_turns = append(all_turns, turns...)
 		}
 
