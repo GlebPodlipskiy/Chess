@@ -1,12 +1,13 @@
 package main
 
 import (
+	"chess/game"
 	"chess/game/fen"
 	"fmt"
 )
 
 func main() {
-	FEN := "6k1/3r1ppp/8/8/8/8/5PPP/2R3K1"
+	FEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
 	settings := fen.Settings{
 		FenMap: map[int]int{
@@ -24,4 +25,7 @@ func main() {
 
 	board_string, _ := fen.BoardToString(current_board, settings)
 	fmt.Println(board_string)
+
+	turns_count := len(game.GetAllTurns(current_board, settings.White))
+	fmt.Println(turns_count)
 }
