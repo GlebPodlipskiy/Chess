@@ -1,27 +1,20 @@
 package main
 
 import (
+	"chess/game"
 	"chess/game/fen"
 	"fmt"
 )
 
 func main() {
-	FEN := "6k1/3r1ppp/8/8/8/8/2R2PPP/6K1"
+	FEN := "2R3k1/3r1ppp/8/8/8/8/5PPP/6K1"
 
-	settings := fen.Settings{
-		FenMap: map[int]int{
-			'p': 1,
-			'n': 2,
-			'b': 3,
-			'r': 4,
-			'q': 5,
-			'k': 6,
-		},
-		White: 1,
-		Black: -1,
-	}
-	current_board, _ := fen.FENToBoard(FEN, settings)
+	current_board, _ := fen.FENToBoard(FEN, game.FenSettings)
 
-	board_string, _ := fen.BoardToString(current_board, settings)
+	board_string, _ := fen.BoardToString(current_board, game.FenSettings)
+
 	fmt.Println(board_string)
+
+	turns := game.GetAllTurns(current_board, game.Black)
+	fmt.Println(len(turns))
 }

@@ -16,6 +16,14 @@ type Board struct {
 func (this Board) GetPieces() []Piece {
 	return this.pieces
 }
+func (this Board) GetPiece(value int) Piece {
+	for _, piece := range this.pieces {
+		if piece.Value == value {
+			return piece
+		}
+	}
+	return Piece{}
+}
 func (this *Board) Set(rank int, file int, value int) {
 	if value != 0 {
 		founded := false

@@ -4,41 +4,49 @@ import (
 	"chess/game/board"
 	"chess/game/fen"
 	"chess/game/turn"
-	"fmt"
+	"chess/library"
 )
 
-var pawn = 1
-var knight = 2
-var bishop = 3
-var rook = 4
-var queen = 5
-var king = 6
-var white = 1
-var black = -1
-var none = 0
+var Pawn = 1
+var Knight = 2
+var Bishop = 3
+var Rook = 4
+var Queen = 5
+var King = 6
+var White = 1
+var Black = -1
+var None = 0
 
-var fen_settings = fen.Settings{
+var FenSettings = fen.Settings{
 
 	FenMap: map[int]int{
-		'p': pawn,
-		'n': knight,
-		'b': bishop,
-		'r': rook,
-		'q': queen,
-		'k': king,
+		'p': Pawn,
+		'n': Knight,
+		'b': Bishop,
+		'r': Rook,
+		'q': Queen,
+		'k': King,
 	},
-	White: white,
-	Black: black,
+	White: White,
+	Black: Black,
 }
 
-func get_side(cell int) int {
+func GetSide(cell int) int {
 	if cell > 0 {
-		return white
+		return White
 	} else if cell < 0 {
-		return black
+		return Black
 	} else {
-		return none
+		return None
 	}
+}
+func GetOpositeSide(side int) int {
+	if side == White {
+		return Black
+	} else if side == Black {
+		return White
+	}
+	return None
 }
 func in_board(rank int, file int) bool {
 	return rank >= 0 && file >= 0 && rank <= 7 && file <= 7
@@ -47,7 +55,7 @@ func get_line(current_board board.Board, rank int, file int, directions [][3]int
 	turns := []turn.Turn{}
 
 	piece := current_board.Get(rank, file)
-	side := get_side(piece)
+	side := GetSide(piece)
 
 	old_cords := turn.Cords{
 		Rank: rank,
@@ -62,7 +70,7 @@ func get_line(current_board board.Board, rank int, file int, directions [][3]int
 
 			if in_board(next_rank, next_file) {
 				next_cell := current_board.Get(next_rank, next_file)
-				next_side := get_side(next_cell)
+				next_side := GetSide(next_cell)
 				next_cords := turn.Cords{
 					File: next_file,
 					Rank: next_rank,
@@ -94,9 +102,9 @@ func get_line(current_board board.Board, rank int, file int, directions [][3]int
 }
 func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 	var piece = current_board.Get(rank, file)
-	side := get_side(piece)
+	side := GetSide(piece)
 
-	if piece == pawn*side {
+	if piece == Pawn*side {
 		old_cords := turn.Cords{
 			File: file,
 			Rank: rank,
@@ -107,7 +115,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 		direction := -1
 		jump_file := 6
 
-		if side == black {
+		if side == Black {
 			direction = 1
 			jump_file = 1
 		}
@@ -143,7 +151,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 		for _, claimed_cords := range all_claimed_cords {
 			if in_board(claimed_cords.Rank, claimed_cords.File) {
 				next_cell := current_board.Get(claimed_cords.Rank, claimed_cords.File)
-				next_side := get_side(next_cell)
+				next_side := GetSide(next_cell)
 
 				if side == -next_side {
 					turns = append(turns, turn.Turn{
@@ -157,7 +165,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 
 		return turns
 
-	} else if piece == knight*side {
+	} else if piece == Knight*side {
 		directions := [][3]int{
 			{2, 1, 1},
 			{1, 2, 1},
@@ -169,7 +177,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{-2, 1, 1},
 		}
 		return get_line(current_board, rank, file, directions)
-	} else if piece == bishop*side {
+	} else if piece == Bishop*side {
 		directions := [][3]int{
 			{1, 1, 8},
 			{1, -1, 8},
@@ -177,7 +185,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{-1, -1, 8},
 		}
 		return get_line(current_board, rank, file, directions)
-	} else if piece == rook*side {
+	} else if piece == Rook*side {
 		directions := [][3]int{
 			{1, 0, 8},
 			{0, -1, 8},
@@ -185,7 +193,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{0, 1, 8},
 		}
 		return get_line(current_board, rank, file, directions)
-	} else if piece == queen*side {
+	} else if piece == Queen*side {
 		directions := [][3]int{
 			{1, 1, 8},
 			{1, -1, 8},
@@ -197,7 +205,7 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 			{0, 1, 8},
 		}
 		return get_line(current_board, rank, file, directions)
-	} else if piece == king*side {
+	} else if piece == King*side {
 		directions := [][3]int{
 			{1, 1, 1},
 			{1, -1, 1},
@@ -215,13 +223,129 @@ func get_turns(current_board board.Board, rank int, file int) []turn.Turn {
 func GetAllTurns(current_board board.Board, current_side int) []turn.Turn {
 	all_turns := []turn.Turn{}
 	for _, piece := range current_board.GetPieces() {
-		side := get_side(piece.Value)
+		side := GetSide(piece.Value)
 		if side == current_side {
 			turns := get_turns(current_board, piece.Rank, piece.File)
-			fmt.Println(len(turns))
-			all_turns = append(all_turns, turns...)
+			validated_turn := []turn.Turn{}
+			for _, current_turn := range turns {
+				if ValidateTurn(&current_board, current_turn, current_side) {
+					validated_turn = append(validated_turn, current_turn)
+				}
+			}
+			all_turns = append(all_turns, validated_turn...)
 		}
 
 	}
 	return all_turns
+}
+func MakeTurn(current_board *board.Board, turn turn.Turn) {
+	piece := current_board.Get(turn.OldCords.Rank, turn.OldCords.File)
+
+	current_board.Set(turn.OldCords.Rank, turn.OldCords.File, 0)
+	current_board.Set(turn.NewCords.Rank, turn.NewCords.File, piece)
+}
+func UnmakeTurn(current_board *board.Board, turn turn.Turn) {
+	piece := current_board.Get(turn.NewCords.Rank, turn.NewCords.File)
+
+	current_board.Set(turn.NewCords.Rank, turn.NewCords.File, 0)
+	current_board.Set(turn.OldCords.Rank, turn.OldCords.File, piece)
+}
+func CheckLine(current_board board.Board, start turn.Cords, direction [2]int, target_value int) bool {
+	current_value := current_board.Get(start.Rank, start.File)
+	distance := 1
+
+	dx, dy := direction[0], direction[1]
+	for distance < 8 {
+		next_rank := start.Rank + dx*distance
+		next_file := start.File + dy*distance
+
+		if in_board(next_rank, next_file) {
+			current_value = current_board.Get(next_rank, next_file)
+
+			if current_value == target_value {
+				return true
+			}
+			if current_value != None {
+				return false
+			}
+			distance++
+		} else {
+			return false
+		}
+
+	}
+	return false
+}
+func IsUnderAttack(current_board board.Board, piece board.Piece, target board.Piece) bool {
+	direction_x := target.Rank - piece.Rank
+	direction_y := target.File - piece.File
+
+	var dx int
+	var dy int
+
+	if direction_x != 0 {
+		dx = library.Abs(direction_x) / direction_x
+	} else {
+		dx = 0
+	}
+	if direction_y != 0 {
+		dy = library.Abs(direction_y) / direction_y
+	} else {
+		dy = 0
+	}
+
+	if piece.Value == Pawn {
+		if direction_y == 0 && library.Abs(direction_x) == 1 {
+			return true
+		}
+	} else if piece.Value == Knight {
+		dist := direction_x + direction_y
+		if dist == 3 && direction_x != 0 && direction_y != 0 {
+			return true
+		}
+	} else if piece.Value == Bishop {
+		on_diagonal := library.Abs(direction_x) == library.Abs(direction_y)
+		if on_diagonal {
+			return CheckLine(current_board, turn.Cords{File: piece.File, Rank: piece.Rank}, [2]int{dx, dy}, target.Value)
+		} else {
+			return false
+		}
+	} else if piece.Value == Rook {
+		on_vert := direction_x == 0 || direction_y == 0
+		if on_vert {
+			return CheckLine(current_board, turn.Cords{File: piece.File, Rank: piece.Rank}, [2]int{dx, dy}, target.Value)
+		} else {
+			return false
+		}
+	} else if piece.Value == Queen {
+		on_diagonal := library.Abs(direction_x) == library.Abs(direction_y)
+		on_vert := direction_x == 0 || direction_y == 0
+
+		if on_diagonal || on_vert {
+			return CheckLine(current_board, turn.Cords{File: piece.File, Rank: piece.Rank}, [2]int{dx, dy}, target.Value)
+		}
+	}
+	return false
+}
+func IsChecked(current_board board.Board, side int) bool {
+	king := current_board.GetPiece(side * King)
+
+	for _, piece := range current_board.GetPieces() {
+		piece_side := GetSide(piece.Value)
+		if side == -piece_side {
+			if IsUnderAttack(current_board, piece, king) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+func ValidateTurn(current_board *board.Board, posible_turn turn.Turn, side int) bool {
+	MakeTurn(current_board, posible_turn)
+	//fmt.Println(fen.BoardToString(*current_board, FenSettings))
+	validated := !IsChecked(*current_board, side)
+	UnmakeTurn(current_board, posible_turn)
+
+	return validated
 }
